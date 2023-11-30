@@ -13,7 +13,7 @@ on:
 name: Install
 
 jobs:
-  R-CMD-check:
+  vms:
     runs-on: ${{ matrix.config.os }}
 
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
@@ -57,3 +57,26 @@ jobs:
         shell: Rscript {0}
         run: |
           install.packages(".", repos = NULL, type = "source")
+
+  centos:
+    runs-on: ubuntu-latest
+    name: CentOS 7
+    container:
+      image: ghcr.io/r-hub/containers/centos7:latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - run: |
+          rig system make-links
+
+      - run: |
+          R CMD build .
+
+      - name: "R next (=patched)"
+        run: |
+          R-next CMD INSTALL format_0.0.0.9000.tar.gz
+
+      - name: "R devel"
+        run: |
+          R-devel CMD INSTALL format_0.0.0.9000.tar.gz
